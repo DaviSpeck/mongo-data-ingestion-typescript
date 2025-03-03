@@ -4,6 +4,6 @@ import { processFile } from './controllers/data.controller';
 const router: Router = Router();
 
 // Route to process files
-router.post('/process-file', processFile);
+router.get('/process-file', processFile);
 
 export default router;

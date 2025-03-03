@@ -10,15 +10,16 @@ services:
     image: mongo:6.0
     container_name: database_service
     ports:
-      - "27017:27017"
+      - "49155:27017"
     volumes:
       - mongo_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
     networks:
       - app_network
-    command: ["mongod", "--bind_ip", "0.0.0.0", "--auth"]
+    command: ["mongod", "--bind_ip_all", "--auth"]
     restart: always
 
   application:
