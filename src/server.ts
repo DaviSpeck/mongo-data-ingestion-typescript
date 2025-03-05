@@ -1,12 +1,13 @@
 import app from './app';
-import connectDatabase from './config/database';
+import { connectMongoDBDatabase, connectPostgresDatabase } from './config/database';
 import logger from './config/logger';
 
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await connectDatabase();
+    // await connectMongoDBDatabase();
+    await connectPostgresDatabase();
     app.listen(PORT, () => {
       logger.info(`Server running on http://localhost:${PORT}`);
     });
