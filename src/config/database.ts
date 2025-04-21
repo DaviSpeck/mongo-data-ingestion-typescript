@@ -25,11 +25,11 @@ export const connectMongoDBDatabase = async () => {
  */
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 5432,
-  username: process.env.DB_USER || 'myuser',
-  password: process.env.DB_PASSWORD || 'mypassword',
-  database: process.env.DB_NAME || 'mydatabase',
+  host: process.env.DB_POSTGRES_HOST || '127.0.0.1',
+  port: Number(process.env.DB_POSTGRES_PORT) || 5437,
+  username: process.env.DB_POSTGRES_USER || 'dri_user',
+  password: process.env.DB_POSTGRES_PASSWORD || 'dri_password',
+  database: process.env.DB_POSTGRES_NAME || 'dri_db',
   entities: [__dirname + '/../entities/*.{ts,js}'],
   synchronize: process.env.NODE_ENV === 'development',
   migrations: [__dirname + '/../migrations/*.{ts,js}'],
@@ -42,7 +42,7 @@ export const AppDataSource = new DataSource({
 export const connectPostgresDatabase = async () => {
   try {
     await AppDataSource.initialize();
-    logger.info(`✅ Connected to PostgreSQL at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+    logger.info(`✅ Connected to PostgreSQL at ${process.env.DB_POSTGRES_HOST}:${process.env.DB_POSTGRES_PORT}`);
   } catch (error) {
     logger.error(`❌ Error connecting to PostgreSQL: ${(error as Error).message}`);
     process.exit(1);

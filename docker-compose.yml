@@ -19,7 +19,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     networks:
       - app_network
-    command: ["mongod", "--bind_ip_all", "--auth"]
+    command: [ "mongod", "--bind_ip_all", "--auth" ]
     restart: always
 
   application:
@@ -40,5 +40,21 @@ services:
       - app_network
     restart: always
 
+  postgres:
+    image: postgres:15
+    container_name: dri_postgres
+    environment:
+      POSTGRES_DB: dri_db
+      POSTGRES_USER: dri_user
+      POSTGRES_PASSWORD: dri_password
+    ports:
+      - "5437:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    restart: always
+
 volumes:
   mongo_data:
+  pg_data:

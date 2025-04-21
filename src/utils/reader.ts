@@ -5,6 +5,8 @@ import csvParser from 'csv-parser';
 import logger from '../config/logger';
 import { processProfiles } from '../services/process.service';
 import { createOrUpdateTimelineData } from '../services/timeline-data.service';
+import { createOrUpdateHistoricoProcesso } from '../services/historico-processo.service';
+import duckdb from 'duckdb';
 
 export const readExcelFiles = async (directory: string): Promise<any[]> => {
   const fs = require('fs');
@@ -51,4 +53,45 @@ export async function readCSVFiles(directory: string): Promise<any[]> {
   }
 
   return data;
+}
+
+export async function readParquetWithDuckDB(filePath: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const db = new duckdb.Database(':memory:');
+    db.all(`SELECT * FROM parquet_scan('${filePath}')`, (err, rows) => {
+      if (err) return reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+export async function readParquetFiles(fileOrDirPath: string): Promise<any[]> {
+  const allData: any[] = [];
+
+  if (!fs.existsSync(fileOrDirPath)) {
+    throw new Error(`Caminho não encontrado: ${fileOrDirPath}`);
+  }
+
+  const stat = fs.statSync(fileOrDirPath);
+
+  if (stat.isFile() && fileOrDirPath.endsWith('.parquet')) {
+    logger.info(`📦 Lendo arquivo Parquet: ${path.basename(fileOrDirPath)}`);
+    const data = await readParquetWithDuckDB(fileOrDirPath);
+    allData.push(...data);
+    await createOrUpdateHistoricoProcesso(data);
+  } else if (stat.isDirectory()) {
+    const files = fs.readdirSync(fileOrDirPath).filter(f => f.endsWith('.parquet'));
+
+    for (const file of files) {
+      const filePath = path.join(fileOrDirPath, file);
+      logger.info(`📦 Lendo arquivo Parquet: ${file}`);
+      const data = await readParquetWithDuckDB(filePath);
+      allData.push(...data);
+      await createOrUpdateHistoricoProcesso(data);
+    }
+  } else {
+    throw new Error('O caminho informado não é um arquivo .parquet nem uma pasta.');
+  }
+
+  return allData;
 }
